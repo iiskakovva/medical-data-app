@@ -1,0 +1,113 @@
+{% extends 'health_info/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Ввод медицинских данных</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">ID пациента *</label>
+                                <input type="text" class="form-control" name="patient_id" required 
+                                       placeholder="Например: P001">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Имя пациента *</label>
+                                <input type="text" class="form-control" name="patient_name" required
+                                       placeholder="Полное имя пациента">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Возраст *</label>
+                                <input type="number" class="form-control" name="age" required 
+                                       min="0" max="150" placeholder="Возраст">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Рост (см) *</label>
+                                <input type="number" step="0.1" class="form-control" name="height" required
+                                       min="0" placeholder="Рост в см">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Вес (кг) *</label>
+                                <input type="number" step="0.1" class="form-control" name="weight" required
+                                       min="0" placeholder="Вес в кг">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Систолическое давление *</label>
+                                <input type="number" class="form-control" name="blood_pressure_systolic" required
+                                       min="50" max="250" placeholder="Верхнее давление">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Диастолическое давление *</label>
+                                <input type="number" class="form-control" name="blood_pressure_diastolic" required
+                                       min="30" max="150" placeholder="Нижнее давление">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Пульс *</label>
+                                <input type="number" class="form-control" name="heart_rate" required
+                                       min="30" max="200" placeholder="Ударов в минуту">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Холестерин *</label>
+                                <input type="number" step="0.1" class="form-control" name="cholesterol" required
+                                       min="0" placeholder="Уровень холестерина">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Формат экспорта *</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="file_type" id="json" value="json" checked>
+                                <label class="form-check-label" for="json">JSON</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="file_type" id="xml" value="xml">
+                                <label class="form-check-label" for="xml">XML</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save"></i> Сохранить и экспортировать
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

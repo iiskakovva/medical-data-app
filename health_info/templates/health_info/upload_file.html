@@ -1,0 +1,67 @@
+{% extends 'health_info/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Загрузка файлов</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Тип файла *</label>
+                        <div class="border rounded p-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="file_type" id="json_upload" value="json" checked>
+                                <label class="form-check-label" for="json_upload">
+                                    <strong>JSON файл</strong>
+                                    <small class="text-muted d-block">- Файл в формате JSON с медицинскими данными</small>
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="file_type" id="xml_upload" value="xml">
+                                <label class="form-check-label" for="xml_upload">
+                                    <strong>XML файл</strong>
+                                    <small class="text-muted d-block">- Файл в формате XML с медицинскими данными</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Выберите файл *</label>
+                        <input type="file" class="form-control" name="file" accept=".json,.xml" required>
+                        <div class="form-text">
+                            Поддерживаемые форматы: .json, .xml (макс. 5MB)
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Пример формата данных:</h6>
+                        <pre class="mb-0 small">{
+  "patient_id": "P001",
+  "patient_name": "Иван Иванов",
+  "age": 35,
+  "height": 175.5,
+  "weight": 70.2,
+  "blood_pressure_systolic": 120,
+  "blood_pressure_diastolic": 80,
+  "heart_rate": 72,
+  "cholesterol": 5.2
+}</pre>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-cloud-upload"></i> Загрузить файл
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

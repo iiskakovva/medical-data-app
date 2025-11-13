@@ -1,0 +1,202 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Медицинская система - Управление здоровьем{% endblock %}
+
+{% block content %}
+<!-- Герой секция -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="bi bi-heart-pulse"></i> Медицинская система
+                </h1>
+                <p class="lead mb-4">
+                    Профессиональная платформа для управления медицинскими данными, 
+                    анализа показателей здоровья и безопасного хранения информации пациентов.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'health_info:input' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-plus-circle"></i> Добавить данные
+                    </a>
+                    <a href="{% url 'health_info:analyze' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-graph-up"></i> Аналитика
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-image mt-4 mt-lg-0">
+                    <i class="bi bi-laptop display-1 text-warning"></i>
+                    <i class="bi bi-phone display-1 text-info mx-4"></i>
+                    <i class="bi bi-tablet display-1 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Статистика -->
+<section class="stats-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="stat-card p-4 bg-white rounded shadow-sm">
+                    <i class="bi bi-people display-4 text-primary mb-3"></i>
+                    <h3 class="text-primary">{{ total_patients }}</h3>
+                    <p class="text-muted mb-0">Пациентов в системе</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card p-4 bg-white rounded shadow-sm">
+                    <i class="bi bi-files display-4 text-success mb-3"></i>
+                    <h3 class="text-success">{{ total_files }}</h3>
+                    <p class="text-muted mb-0">Файлов данных</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card p-4 bg-white rounded shadow-sm">
+                    <i class="bi bi-shield-check display-4 text-warning mb-3"></i>
+                    <h3 class="text-warning">100%</h3>
+                    <p class="text-muted mb-0">Безопасность данных</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card p-4 bg-white rounded shadow-sm">
+                    <i class="bi bi-clock-history display-4 text-info mb-3"></i>
+                    <h3 class="text-info">24/7</h3>
+                    <p class="text-muted mb-0">Доступность</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Возможности -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Возможности системы</h2>
+            <p class="lead text-muted">Все необходимое для эффективного управления медицинскими данными</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 h-100 border rounded">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-clipboard2-data display-4 text-primary"></i>
+                    </div>
+                    <h4>Ввод данных</h4>
+                    <p class="text-muted">
+                        Удобный ввод медицинских показателей с автоматической валидацией 
+                        и расчетом индекса массы тела.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check text-success"></i> Автоматическая валидация</li>
+                        <li><i class="bi bi-check text-success"></i> Расчет ИМТ</li>
+                        <li><i class="bi bi-check text-success"></i> Проверка давления</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 h-100 border rounded">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-file-earmark-arrow-down display-4 text-success"></i>
+                    </div>
+                    <h4>Импорт/Экспорт</h4>
+                    <p class="text-muted">
+                        Поддержка JSON и XML форматов для удобного обмена данными 
+                        с другими медицинскими системами.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check text-success"></i> JSON формат</li>
+                        <li><i class="bi bi-check text-success"></i> XML формат</li>
+                        <li><i class="bi bi-check text-success"></i> Автоматическая конвертация</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="feature-card p-4 h-100 border rounded">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-graph-up-arrow display-4 text-warning"></i>
+                    </div>
+                    <h4>Аналитика</h4>
+                    <p class="text-muted">
+                        Детальный анализ медицинских показателей с визуализацией 
+                        и статистическими отчетами.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check text-success"></i> Статистика ИМТ</li>
+                        <li><i class="bi bi-check text-success"></i> Анализ давления</li>
+                        <li><i class="bi bi-check text-success"></i> Графики и отчеты</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Как это работает -->
+<section class="how-it-works py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Как это работает</h2>
+            <p class="lead text-muted">Простой процесс управления медицинскими данными</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 80px; height: 80px; font-size: 2rem;">
+                    1
+                </div>
+                <h4>Ввод данных</h4>
+                <p class="text-muted">
+                    Введите медицинские показатели пациента через удобную веб-форму
+                </p>
+            </div>
+            
+            <div class="col-md-4 text-center mb-4">
+                <div class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 80px; height: 80px; font-size: 2rem;">
+                    2
+                </div>
+                <h4>Экспорт</h4>
+                <p class="text-muted">
+                    Данные автоматически экспортируются в выбранный формат (JSON/XML)
+                </p>
+            </div>
+            
+            <div class="col-md-4 text-center mb-4">
+                <div class="step-number bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 80px; height: 80px; font-size: 2rem;">
+                    3
+                </div>
+                <h4>Анализ</h4>
+                <p class="text-muted">
+                    Просматривайте аналитику и управляйте данными через веб-интерфейс
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA секция -->
+<section class="cta-section py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-4">Готовы начать работу?</h2>
+        <p class="lead mb-4">
+            Присоединяйтесь к тысячам медицинских специалистов, которые уже используют нашу систему
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'health_info:input' %}" class="btn btn-light btn-lg px-4">
+                <i class="bi bi-rocket"></i> Начать сейчас
+            </a>
+            <a href="{% url 'health_info:upload' %}" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-cloud-upload"></i> Загрузить данные
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
