@@ -1,11 +1,13 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.urls import reverse
 
 class HealthData(models.Model):
     patient_id = models.CharField(
         max_length=50, 
         verbose_name="ID пациента",
-        unique=True
+        unique=True,
+        error_messages={'unique': 'Пациент с таким ID уже существует'}
     )
     patient_name = models.CharField(
         max_length=100, 
@@ -40,6 +42,13 @@ class HealthData(models.Model):
         verbose_name="Уровень холестерина"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    source = models.CharField(
+        max_length=10,
+        choices=[('db', 'База данных'), ('file', 'Файл')],
+        default='db',
+        verbose_name="Источник данных"
+    )
     
     @property
     def bmi(self):
@@ -60,6 +69,9 @@ class HealthData(models.Model):
         else:
             return "Ожирение"
     
+    def get_absolute_url(self):
+        return reverse('health_info:edit_data', kwargs={'pk': self.pk})
+    
     def __str__(self):
         return f"{self.patient_name} ({self.patient_id})"
     
@@ -67,3 +79,8 @@ class HealthData(models.Model):
         verbose_name = "Медицинские данные"
         verbose_name_plural = "Медицинские данные"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['patient_id']),
+            models.Index(fields=['patient_name']),
+            models.Index(fields=['created_at']),
+        ]

@@ -75,7 +75,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'health_info:files' %}">
+                        <a class="nav-link" href="{% url 'health_info:view_data' %}">
                             <i class="bi bi-folder2-open"></i> Файлы
                         </a>
                     </li>
@@ -150,9 +150,9 @@
                     <h6 class="mb-3">Функции</h6>
                     <div class="footer-links">
                         <a href="{% url 'health_info:upload' %}" class="d-block text-muted mb-2">Импорт данных</a>
-                        <a href="{% url 'health_info:files' %}" class="d-block text-muted mb-2">Управление файлами</a>
+                        <a href="{% url 'health_info:view_data' %}?source=files" class="d-block text-muted mb-2">Управление файлами</a>
                         <a href="/admin/" class="d-block text-muted mb-2">Администрирование</a>
-                    </div>
+                     </div>
                 </div>
                 <div class="col-lg-3 mb-4">
                     <h6 class="mb-3">Контакты</h6>

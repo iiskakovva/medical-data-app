@@ -2,17 +2,33 @@ from django import forms
 from .models import HealthData
 
 class HealthDataForm(forms.ModelForm):
+    STORAGE_CHOICES = [
+        ('db', 'Сохранить в базу данных'),
+        ('json', 'Экспорт в JSON файл'),
+        ('xml', 'Экспорт в XML файл'),
+    ]
+    
+    storage_type = forms.ChoiceField(
+        choices=STORAGE_CHOICES,
+        label='Способ сохранения',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='db'
+    )
+    
     class Meta:
         model = HealthData
         fields = '__all__'
+        exclude = ['source', 'created_at', 'updated_at']
         widgets = {
             'patient_id': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Введите ID пациента'
+                'placeholder': 'Введите ID пациента',
+                'autocomplete': 'off'
             }),
             'patient_name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Введите полное имя'
+                'placeholder': 'Введите полное имя',
+                'autocomplete': 'off'
             }),
             'age': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -69,6 +85,65 @@ class HealthDataForm(forms.ModelForm):
         
         return cleaned_data
 
+class HealthDataEditForm(forms.ModelForm):
+    class Meta:
+        model = HealthData
+        fields = '__all__'
+        exclude = ['patient_id', 'source', 'created_at', 'updated_at']
+        widgets = {
+            'patient_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'autocomplete': 'off'
+            }),
+            'age': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '150'
+            }),
+            'height': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'weight': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'blood_pressure_systolic': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '50',
+                'max': '250'
+            }),
+            'blood_pressure_diastolic': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '30',
+                'max': '150'
+            }),
+            'heart_rate': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '30',
+                'max': '200'
+            }),
+            'cholesterol': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.1',
+                'min': '0'
+            }),
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        systolic = cleaned_data.get('blood_pressure_systolic')
+        diastolic = cleaned_data.get('blood_pressure_diastolic')
+        
+        if systolic and diastolic and systolic <= diastolic:
+            raise forms.ValidationError(
+                "Систолическое давление должно быть больше диастолического"
+            )
+        
+        return cleaned_data
+
 class FileUploadForm(forms.Form):
     FILE_TYPES = [
         ('json', 'JSON файл'),
@@ -88,15 +163,18 @@ class FileUploadForm(forms.Form):
         widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
     )
 
-class ExportForm(forms.Form):
-    FILE_TYPES = [
-        ('json', 'JSON'),
-        ('xml', 'XML'),
+class DataSourceForm(forms.Form):
+    SOURCE_CHOICES = [
+        ('db', 'База данных'),
+        ('files', 'Файлы JSON/XML'),
     ]
     
-    file_type = forms.ChoiceField(
-        choices=FILE_TYPES,
-        label='Формат экспорта',
-        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
-        initial='json'
+    source = forms.ChoiceField(
+        choices=SOURCE_CHOICES,
+        label='Источник данных',
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'dataSourceSelect'
+        }),
+        initial='db'
     )

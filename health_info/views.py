@@ -1,7 +1,9 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.conf import settings
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 import os
 import json
 import xml.etree.ElementTree as ET
@@ -10,8 +12,9 @@ import uuid
 import re
 
 from .models import HealthData
+from .forms import HealthDataForm, HealthDataEditForm, FileUploadForm, DataSourceForm
 
-# Простые утилиты прямо в views.py (временно)
+# Утилиты для работы с файлами
 def validate_health_data(data):
     required_fields = ['patient_id', 'patient_name', 'age', 'height', 'weight', 
                       'blood_pressure_systolic', 'blood_pressure_diastolic', 
@@ -73,47 +76,191 @@ def home(request):
 
 def input_data(request):
     if request.method == 'POST':
-        try:
-            # Создаем объект HealthData из POST данных
-            health_data = HealthData(
-                patient_id=request.POST.get('patient_id'),
-                patient_name=request.POST.get('patient_name'),
-                age=int(request.POST.get('age', 0)),
-                height=float(request.POST.get('height', 0)),
-                weight=float(request.POST.get('weight', 0)),
-                blood_pressure_systolic=int(request.POST.get('blood_pressure_systolic', 0)),
-                blood_pressure_diastolic=int(request.POST.get('blood_pressure_diastolic', 0)),
-                heart_rate=int(request.POST.get('heart_rate', 0)),
-                cholesterol=float(request.POST.get('cholesterol', 0)),
-            )
-            
-            # Сохраняем в базу
-            health_data.save()
-            
-            # Экспортируем в файл
-            file_type = request.POST.get('file_type', 'json')
-            upload_dir = get_upload_directory()
-            
-            if file_type == 'json':
-                content = export_to_json(health_data)
-                filename = f"health_data_{health_data.patient_id}.json"
-            else:
-                content = export_to_xml(health_data)
-                filename = f"health_data_{health_data.patient_id}.xml"
-            
-            safe_filename = sanitize_filename(filename)
-            file_path = os.path.join(upload_dir, safe_filename)
-            
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(content)
-            
-            messages.success(request, f'Данные сохранены и экспортированы в {file_type.upper()}!')
-            return redirect('health_info:files')
-            
-        except Exception as e:
-            messages.error(request, f'Ошибка: {str(e)}')
+        form = HealthDataForm(request.POST)
+        if form.is_valid():
+            try:
+                storage_type = form.cleaned_data['storage_type']
+                patient_data = form.cleaned_data
+                
+                if storage_type == 'db':
+                    # Сохраняем в базу данных
+                    try:
+                        health_data = HealthData.objects.create(
+                            patient_id=patient_data['patient_id'],
+                            patient_name=patient_data['patient_name'],
+                            age=patient_data['age'],
+                            height=patient_data['height'],
+                            weight=patient_data['weight'],
+                            blood_pressure_systolic=patient_data['blood_pressure_systolic'],
+                            blood_pressure_diastolic=patient_data['blood_pressure_diastolic'],
+                            heart_rate=patient_data['heart_rate'],
+                            cholesterol=patient_data['cholesterol'],
+                            source='db'
+                        )
+                        messages.success(request, f'Данные пациента {health_data.patient_name} успешно сохранены в базу данных!')
+                        return redirect('health_info:view_data')
+                        
+                    except Exception as e:
+                        if 'unique' in str(e).lower():
+                            messages.error(request, f'Пациент с ID {patient_data["patient_id"]} уже существует в базе данных!')
+                        else:
+                            messages.error(request, f'Ошибка при сохранении в базу: {str(e)}')
+                
+                else:
+                    # Экспортируем в файл
+                    health_data = HealthData(
+                        patient_id=patient_data['patient_id'],
+                        patient_name=patient_data['patient_name'],
+                        age=patient_data['age'],
+                        height=patient_data['height'],
+                        weight=patient_data['weight'],
+                        blood_pressure_systolic=patient_data['blood_pressure_systolic'],
+                        blood_pressure_diastolic=patient_data['blood_pressure_diastolic'],
+                        heart_rate=patient_data['heart_rate'],
+                        cholesterol=patient_data['cholesterol'],
+                        source='file'
+                    )
+                    
+                    upload_dir = get_upload_directory()
+                    
+                    if storage_type == 'json':
+                        content = export_to_json(health_data)
+                        filename = f"health_data_{health_data.patient_id}.json"
+                    else:
+                        content = export_to_xml(health_data)
+                        filename = f"health_data_{health_data.patient_id}.xml"
+                    
+                    safe_filename = sanitize_filename(filename)
+                    file_path = os.path.join(upload_dir, safe_filename)
+                    
+                    with open(file_path, 'w', encoding='utf-8') as file:
+                        file.write(content)
+                    
+                    messages.success(request, f'Данные успешно экспортированы в {storage_type.upper()} файл!')
+                    return redirect('health_info:view_data')
+                    
+            except Exception as e:
+                messages.error(request, f'Ошибка: {str(e)}')
+    else:
+        form = HealthDataForm()
     
-    return render(request, 'health_info/input_data.html')
+    return render(request, 'health_info/input_data.html', {'form': form})
+
+def view_data(request):
+    source_form = DataSourceForm(request.GET or None)
+    source = request.GET.get('source', 'db')
+    
+    context = {
+        'source_form': source_form,
+        'selected_source': source,
+    }
+    
+    if source == 'db':
+        # Данные из базы
+        health_data = HealthData.objects.all().order_by('-created_at')
+        context['db_data'] = health_data
+        context['total_records'] = health_data.count()
+    else:
+        # Данные из файлов
+        upload_dir = get_upload_directory()
+        files_data = []
+        
+        if os.path.exists(upload_dir):
+            for filename in os.listdir(upload_dir):
+                if filename.endswith(('.json', '.xml')):
+                    file_path = os.path.join(upload_dir, filename)
+                    try:
+                        file_info = {
+                            'name': filename,
+                            'type': 'JSON' if filename.endswith('.json') else 'XML',
+                            'size': os.path.getsize(file_path),
+                        }
+                        
+                        if filename.endswith('.json'):
+                            with open(file_path, 'r', encoding='utf-8') as file:
+                                content = json.load(file)
+                        else:
+                            tree = ET.parse(file_path)
+                            root = tree.getroot()
+                            content = {}
+                            for child in root:
+                                content[child.tag] = child.text
+                        
+                        files_data.append({
+                            'file_info': file_info,
+                            'content': content
+                        })
+                    except Exception as e:
+                        files_data.append({
+                            'file_info': file_info,
+                            'error': str(e)
+                        })
+        
+        context['files_data'] = files_data
+        context['total_records'] = len(files_data)
+    
+    return render(request, 'health_info/view_data.html', context)
+
+@csrf_exempt
+def search_data(request):
+    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        query = request.GET.get('q', '').strip()
+        
+        if len(query) < 2:
+            return JsonResponse({'error': 'Слишком короткий запрос'}, status=400)
+        
+        results = HealthData.objects.filter(
+            models.Q(patient_id__icontains=query) |
+            models.Q(patient_name__icontains=query)
+        ).values(
+            'id', 'patient_id', 'patient_name', 'age', 'height', 'weight',
+            'blood_pressure_systolic', 'blood_pressure_diastolic', 
+            'heart_rate', 'cholesterol', 'bmi', 'created_at'
+        )[:50]  # Ограничиваем результаты
+        
+        data = list(results)
+        for item in data:
+            item['created_at'] = item['created_at'].strftime('%d.%m.%Y %H:%M')
+            item['bmi_category'] = HealthData(
+                bmi=item['bmi']
+            ).get_bmi_category()
+        
+        return JsonResponse({'results': data, 'count': len(data)})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def edit_data(request, pk):
+    health_data = get_object_or_404(HealthData, pk=pk)
+    
+    if request.method == 'POST':
+        form = HealthDataEditForm(request.POST, instance=health_data)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, f'Данные пациента {health_data.patient_name} успешно обновлены!')
+                return redirect('health_info:view_data')
+            except Exception as e:
+                messages.error(request, f'Ошибка при обновлении: {str(e)}')
+    else:
+        form = HealthDataEditForm(instance=health_data)
+    
+    return render(request, 'health_info/edit_data.html', {
+        'form': form,
+        'health_data': health_data
+    })
+
+@require_http_methods(["POST"])
+def delete_data(request, pk):
+    health_data = get_object_or_404(HealthData, pk=pk)
+    patient_name = health_data.patient_name
+    
+    try:
+        health_data.delete()
+        messages.success(request, f'Данные пациента {patient_name} успешно удалены!')
+    except Exception as e:
+        messages.error(request, f'Ошибка при удалении: {str(e)}')
+    
+    return redirect('health_info:view_data')
 
 def upload_file(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -121,7 +268,6 @@ def upload_file(request):
         file_type = request.POST.get('file_type', 'json')
         
         try:
-            # Сохраняем файл
             safe_filename = sanitize_filename(uploaded_file.name)
             upload_dir = get_upload_directory()
             file_path = os.path.join(upload_dir, safe_filename)
@@ -130,7 +276,6 @@ def upload_file(request):
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
             
-            # Читаем и парсим файл
             if file_type == 'json':
                 with open(file_path, 'r', encoding='utf-8') as file:
                     data = json.load(file)
@@ -141,7 +286,6 @@ def upload_file(request):
                 for child in root:
                     data[child.tag] = child.text
                 
-                # Конвертируем числа
                 numeric_fields = ['age', 'height', 'weight', 'blood_pressure_systolic', 
                                 'blood_pressure_diastolic', 'heart_rate', 'cholesterol']
                 for field in numeric_fields:
@@ -153,73 +297,32 @@ def upload_file(request):
             
             validate_health_data(data)
             
-            # Сохраняем в базу
-            health_data = HealthData(
-                patient_id=data['patient_id'],
-                patient_name=data['patient_name'],
-                age=data['age'],
-                height=data['height'],
-                weight=data['weight'],
-                blood_pressure_systolic=data['blood_pressure_systolic'],
-                blood_pressure_diastolic=data['blood_pressure_diastolic'],
-                heart_rate=data['heart_rate'],
-                cholesterol=data['cholesterol'],
-            )
-            health_data.save()
+            # Проверяем дубликаты перед сохранением в БД
+            if HealthData.objects.filter(patient_id=data['patient_id']).exists():
+                messages.warning(request, f'Пациент с ID {data["patient_id"]} уже существует в базе данных. Файл загружен, но данные не импортированы.')
+            else:
+                health_data = HealthData.objects.create(
+                    patient_id=data['patient_id'],
+                    patient_name=data['patient_name'],
+                    age=data['age'],
+                    height=data['height'],
+                    weight=data['weight'],
+                    blood_pressure_systolic=data['blood_pressure_systolic'],
+                    blood_pressure_diastolic=data['blood_pressure_diastolic'],
+                    heart_rate=data['heart_rate'],
+                    cholesterol=data['cholesterol'],
+                    source='file'
+                )
+                messages.success(request, f'Файл успешно загружен и данные пациента {health_data.patient_name} импортированы в базу!')
             
-            messages.success(request, 'Файл успешно загружен и данные импортированы!')
-            return redirect('health_info:files')
+            return redirect('health_info:view_data')
             
         except Exception as e:
-            # Удаляем невалидный файл
             if os.path.exists(file_path):
                 os.remove(file_path)
             messages.error(request, f'Ошибка: {str(e)}')
     
     return render(request, 'health_info/upload_file.html')
-
-def file_list(request):
-    upload_dir = get_upload_directory()
-    files = []
-    
-    if os.path.exists(upload_dir):
-        for filename in os.listdir(upload_dir):
-            if filename.endswith(('.json', '.xml')):
-                file_path = os.path.join(upload_dir, filename)
-                try:
-                    file_info = {
-                        'name': filename,
-                        'type': 'JSON' if filename.endswith('.json') else 'XML',
-                        'size': os.path.getsize(file_path),
-                    }
-                    
-                    # Читаем содержимое файла
-                    if filename.endswith('.json'):
-                        with open(file_path, 'r', encoding='utf-8') as file:
-                            content = json.load(file)
-                    else:
-                        tree = ET.parse(file_path)
-                        root = tree.getroot()
-                        content = {}
-                        for child in root:
-                            content[child.tag] = child.text
-                    
-                    files.append({
-                        'file_info': file_info,
-                        'content': content
-                    })
-                except Exception as e:
-                    files.append({
-                        'file_info': file_info,
-                        'error': str(e)
-                    })
-    
-    context = {
-        'file_contents': files,
-        'files_exist': len(files) > 0,
-        'total_files': len(files)
-    }
-    return render(request, 'health_info/file_list.html', context)
 
 def analyze_data(request):
     all_data = HealthData.objects.all()
@@ -228,13 +331,11 @@ def analyze_data(request):
         messages.info(request, 'Нет данных для анализа.')
         return redirect('health_info:home')
     
-    # Статистика
     total_patients = all_data.count()
     avg_age = sum([data.age for data in all_data]) / total_patients
     avg_bmi = sum([data.bmi for data in all_data]) / total_patients
     avg_heart_rate = sum([data.heart_rate for data in all_data]) / total_patients
     
-    # Категории ИМТ
     bmi_categories = {
         'underweight': all_data.filter(bmi__lt=18.5).count(),
         'normal': all_data.filter(bmi__gte=18.5, bmi__lt=25).count(),
@@ -252,16 +353,3 @@ def analyze_data(request):
     }
     
     return render(request, 'health_info/analyze.html', context)
-
-def download_file(request, filename):
-    upload_dir = get_upload_directory()
-    file_path = os.path.join(upload_dir, filename)
-    
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as file:
-            response = HttpResponse(file.read(), content_type='application/octet-stream')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            return response
-    
-    messages.error(request, 'Файл не найден')
-    return redirect('health_info:files')
