@@ -1,0 +1,316 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Ввод данных - Медицинские данные{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-plus-circle"></i> Ввод медицинских данных</h2>
+        <p class="text-muted">Заполните форму для добавления новых медицинских данных пациента</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" id="healthForm">
+            {% csrf_token %}
+            
+            <!-- Основная информация -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-person"></i> Основная информация</h5>
+                </div>
+                <div class="card-body">
+                    <!-- ID пациента -->
+                    <div class="mb-3">
+                        <label class="form-label">ID пациента *</label>
+                        {{ form.patient_id }}
+                        {% if form.patient_id.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.patient_id.errors %}
+                            <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Имя пациента -->
+                    <div class="mb-3">
+                        <label class="form-label">Имя пациента *</label>
+                        {{ form.patient_name }}
+                        {% if form.patient_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.patient_name.errors %}
+                            <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Возраст -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Возраст *</label>
+                                {{ form.age }}
+                                {% if form.age.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.age.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Рост -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Рост (см) *</label>
+                                {{ form.height }}
+                                {% if form.height.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.height.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Вес -->
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Вес (кг) *</label>
+                                {{ form.weight }}
+                                {% if form.weight.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.weight.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Медицинские показатели -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-heart"></i> Медицинские показатели</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Систолическое давление -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Систолическое давление *</label>
+                                {{ form.blood_pressure_systolic }}
+                                <small class="form-text text-muted">Верхнее давление</small>
+                                {% if form.blood_pressure_systolic.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.blood_pressure_systolic.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Диастолическое давление -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Диастолическое давление *</label>
+                                {{ form.blood_pressure_diastolic }}
+                                <small class="form-text text-muted">Нижнее давление</small>
+                                {% if form.blood_pressure_diastolic.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.blood_pressure_diastolic.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Пульс -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Пульс *</label>
+                                {{ form.heart_rate }}
+                                <small class="form-text text-muted">Ударов в минуту</small>
+                                {% if form.heart_rate.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.heart_rate.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Холестерин -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Холестерин *</label>
+                                {{ form.cholesterol }}
+                                <small class="form-text text-muted">Уровень холестерина</small>
+                                {% if form.cholesterol.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.cholesterol.errors %}
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Общие ошибки формы -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <h6><i class="bi bi-exclamation-triangle"></i> Ошибки в форме:</h6>
+                <ul class="mb-0">
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="reset" class="btn btn-outline-secondary me-md-2">
+                    <i class="bi bi-arrow-clockwise"></i> Очистить
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить и экспортировать в JSON
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-calculator"></i> Калькулятор ИМТ</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Рост (см)</label>
+                    <input type="number" class="form-control" id="bmiHeight" placeholder="Введите рост">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Вес (кг)</label>
+                    <input type="number" class="form-control" id="bmiWeight" placeholder="Введите вес">
+                </div>
+                <button type="button" class="btn btn-outline-primary w-100" onclick="calculateBMI()">
+                    Рассчитать ИМТ
+                </button>
+                <div id="bmiResult" class="mt-3" style="display: none;">
+                    <hr>
+                    <h6>Результат:</h6>
+                    <p id="bmiValue" class="fw-bold fs-4"></p>
+                    <p id="bmiCategory" class="badge"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> Справка</h5>
+            </div>
+            <div class="card-body">
+                <h6>Категории ИМТ:</h6>
+                <ul class="list-unstyled small">
+                    <li><span class="badge bmi-underweight">Недостаточный вес</span> - менее 18.5</li>
+                    <li><span class="badge bmi-normal">Нормальный вес</span> - 18.5 - 24.9</li>
+                    <li><span class="badge bmi-overweight">Избыточный вес</span> - 25 - 29.9</li>
+                    <li><span class="badge bmi-obese">Ожирение</span> - 30 и более</li>
+                </ul>
+                <h6 class="mt-3">Норма давления:</h6>
+                <ul class="list-unstyled small">
+                    <li><strong>Оптимальное:</strong> менее 120/80</li>
+                    <li><strong>Нормальное:</strong> 120-129/80-84</li>
+                    <li><strong>Высокое нормальное:</strong> 130-139/85-89</li>
+                    <li><strong>Гипертензия:</strong> 140/90 и выше</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function calculateBMI() {
+    const height = parseFloat(document.getElementById('bmiHeight').value) / 100; // convert to meters
+    const weight = parseFloat(document.getElementById('bmiWeight').value);
+    
+    if (!height || !weight || height <= 0 || weight <= 0) {
+        alert('Пожалуйста, введите корректные значения роста и веса');
+        return;
+    }
+    
+    const bmi = weight / (height * height);
+    const resultDiv = document.getElementById('bmiResult');
+    const bmiValue = document.getElementById('bmiValue');
+    const bmiCategory = document.getElementById('bmiCategory');
+    
+    bmiValue.textContent = bmi.toFixed(2);
+    
+    // Set category and color
+    let category = '';
+    let colorClass = '';
+    
+    if (bmi < 18.5) {
+        category = 'Недостаточный вес';
+        colorClass = 'bmi-underweight';
+    } else if (bmi < 25) {
+        category = 'Нормальный вес';
+        colorClass = 'bmi-normal';
+    } else if (bmi < 30) {
+        category = 'Избыточный вес';
+        colorClass = 'bmi-overweight';
+    } else {
+        category = 'Ожирение';
+        colorClass = 'bmi-obese';
+    }
+    
+    bmiCategory.textContent = category;
+    bmiCategory.className = `badge ${colorClass}`;
+    resultDiv.style.display = 'block';
+}
+
+// Auto-fill form with test data for debugging
+function fillTestData() {
+    document.querySelector('[name="patient_id"]').value = 'TEST_' + Math.floor(Math.random() * 1000);
+    document.querySelector('[name="patient_name"]').value = 'Тестовый Пациент';
+    document.querySelector('[name="age"]').value = '35';
+    document.querySelector('[name="height"]').value = '175';
+    document.querySelector('[name="weight"]').value = '70';
+    document.querySelector('[name="blood_pressure_systolic"]').value = '120';
+    document.querySelector('[name="blood_pressure_diastolic"]').value = '80';
+    document.querySelector('[name="heart_rate"]').value = '72';
+    document.querySelector('[name="cholesterol"]').value = '5.2';
+}
+
+// Add debug button (remove in production)
+document.addEventListener('DOMContentLoaded', function() {
+    const debugButton = document.createElement('button');
+    debugButton.type = 'button';
+    debugButton.className = 'btn btn-warning btn-sm position-fixed';
+    debugButton.style.bottom = '20px';
+    debugButton.style.right = '20px';
+    debugButton.style.zIndex = '1000';
+    debugButton.innerHTML = '<i class="bi bi-bug"></i> Тест данные';
+    debugButton.onclick = fillTestData;
+    document.body.appendChild(debugButton);
+});
+</script>
+{% endblock %}

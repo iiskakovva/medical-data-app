@@ -1,0 +1,257 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Анализ данных - Медицинские данные{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-graph-up"></i> Анализ медицинских данных</h2>
+        <p class="text-muted">Статистика и анализ показателей всех пациентов</p>
+    </div>
+</div>
+
+{% if total_patients == 0 %}
+<div class="alert alert-info text-center">
+    <i class="bi bi-graph-up display-4 d-block mb-3"></i>
+    <h4>Нет данных для анализа</h4>
+    <p class="mb-3">Добавьте данные пациентов через форму или загрузите файлы, чтобы увидеть статистику.</p>
+    <div class="d-grid gap-2 d-md-block">
+        <a href="{% url 'health_info:input_data' %}" class="btn btn-primary me-2">
+            <i class="bi bi-plus-circle"></i> Ввести данные
+        </a>
+        <a href="{% url 'health_info:upload_file' %}" class="btn btn-outline-primary">
+            <i class="bi bi-upload"></i> Загрузить файл
+        </a>
+    </div>
+</div>
+{% else %}
+<!-- Статистические карточки -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center stat-card">
+            <div class="card-body">
+                <i class="bi bi-people display-6"></i>
+                <h3>{{ total_patients }}</h3>
+                <p class="mb-0">Всего пациентов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <i class="bi bi-person display-6"></i>
+                <h3>{{ avg_age }}</h3>
+                <p class="mb-0">Средний возраст</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-warning text-dark">
+            <div class="card-body">
+                <i class="bi bi-speedometer2 display-6"></i>
+                <h3>{{ avg_bmi }}</h3>
+                <p class="mb-0">Средний ИМТ</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-danger text-white">
+            <div class="card-body">
+                <i class="bi bi-heart-pulse display-6"></i>
+                <h3>{{ avg_heart_rate }}</h3>
+                <p class="mb-0">Средний пульс</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Распределение по ИМТ -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-pie-chart"></i> Распределение по ИМТ</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bmi-underweight me-2" style="width: 20px; height: 20px;"></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <span>Недостаточный вес</span>
+                                    <strong>{{ bmi_categories.underweight }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bmi-underweight" ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bmi-normal me-2" style="width: 20px; height: 20px;"></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <span>Нормальный вес</span>
+                                    <strong>{{ bmi_categories.normal }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bmi-normal" ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bmi-overweight me-2" style="width: 20px; height: 20px;"></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <span>Избыточный вес</span>
+                                    <strong>{{ bmi_categories.overweight }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bmi-overweight"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bmi-obese me-2" style="width: 20px; height: 20px;"></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <span>Ожирение</span>
+                                    <strong>{{ bmi_categories.obese }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bmi-obese"></div>    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Артериальное давление -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-droplet"></i> Артериальное давление</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-success bg-opacity-10 rounded">
+                            <span>Нормальное (&lt;120/80)</span>
+                            <strong>{{ bp_categories.normal }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-warning bg-opacity-10 rounded">
+                            <span>Повышенное (120-129/&lt;80)</span>
+                            <strong>{{ bp_categories.elevated }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-orange bg-opacity-10 rounded">
+                            <span>Гипертензия 1 стадии (130-139/80-89)</span>
+                            <strong>{{ bp_categories.stage1 }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-danger bg-opacity-10 rounded">
+                            <span>Гипертензия 2 стадии (≥140/≥90)</span>
+                            <strong>{{ bp_categories.stage2 }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Детальная таблица -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-table"></i> Детальные данные пациентов</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Пациент</th>
+                                <th>Возраст</th>
+                                <th>Рост</th>
+                                <th>Вес</th>
+                                <th>ИМТ</th>
+                                <th>Категория ИМТ</th>
+                                <th>Давление</th>
+                                <th>Пульс</th>
+                                <th>Холестерин</th>
+                                <th>Дата добавления</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in all_data %}
+                            <tr>
+                                <td><strong>{{ data.patient_id }}</strong></td>
+                                <td>{{ data.patient_name }}</td>
+                                <td>{{ data.age }}</td>
+                                <td>{{ data.height }} см</td>
+                                <td>{{ data.weight }} кг</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if data.bmi < 18.5 %}bmi-underweight
+                                        {% elif data.bmi < 25 %}bmi-normal
+                                        {% elif data.bmi < 30 %}bmi-overweight
+                                        {% else %}bmi-obese{% endif %}">
+                                        {{ data.bmi }}
+                                    </span>
+                                </td>
+                                <td>{{ data.get_bmi_category }}</td>
+                                <td>
+                                    <span class="{% if data.blood_pressure_systolic >= 140 or data.blood_pressure_diastolic >= 90 %}text-danger fw-bold{% endif %}">
+                                        {{ data.blood_pressure_systolic }}/{{ data.blood_pressure_diastolic }}
+                                    </span>
+                                </td>
+                                <td>{{ data.heart_rate }}</td>
+                                <td>{{ data.cholesterol }}</td>
+                                <td><small>{{ data.created_at|date:"d.m.Y H:i" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+.bg-orange {
+    background-color: #fd7e14 !important;
+}
+.bmi-underweight {
+    background-color: #17a2b8 !important;
+}
+.bmi-normal {
+    background-color: #28a745 !important;
+}
+.bmi-overweight {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+.bmi-obese {
+    background-color: #dc3545 !important;
+}
+</style>
+{% endblock %}

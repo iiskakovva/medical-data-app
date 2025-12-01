@@ -1,0 +1,97 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Главная - Медицинские данные{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4"><i class="bi bi-heart-pulse text-primary"></i> Добро пожаловать!</h1>
+            <p class="lead">Система для управления медицинскими данными пациентов с поддержкой импорта и экспорта в формате JSON.</p>
+            <hr class="my-4">
+            <p>Используйте систему для ввода, хранения, анализа и обмена медицинскими показателями.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <i class="bi bi-people display-4"></i>
+                <h3>{{ total_patients }}</h3>
+                <p class="mb-0">Пациентов в системе</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <i class="bi bi-files display-4"></i>
+                <h3>{{ total_files }}</h3>
+                <p class="mb-0">Файлов данных</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-file-earmark-arrow-down display-4"></i>
+                <h3>JSON</h3>
+                <p class="mb-0">Поддержка формата</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white text-center">
+            <div class="card-body">
+                <i class="bi bi-shield-check display-4"></i>
+                <h3>Безопасность</h3>
+                <p class="mb-0">Валидация данных</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-lightning"></i> Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'health_info:input_data' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle"></i> Ввести новые данные
+                    </a>
+                    <a href="{% url 'health_info:upload_file' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-upload"></i> Загрузить файл
+                    </a>
+                    <a href="{% url 'health_info:analyze_data' %}" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-graph-up"></i> Анализ данных
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> О системе</h5>
+            </div>
+            <div class="card-body">
+                <h6>Возможности системы:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check text-success"></i> Ввод медицинских данных через веб-форму</li>
+                    <li><i class="bi bi-check text-success"></i> Экспорт данных в JSON формат</li>
+                    <li><i class="bi bi-check text-success"></i> Импорт данных из JSON файлов</li>
+                    <li><i class="bi bi-check text-success"></i> Валидация и санитайзинг данных</li>
+                    <li><i class="bi bi-check text-success"></i> Статистический анализ показателей</li>
+                    <li><i class="bi bi-check text-success"></i> Безопасное хранение файлов</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

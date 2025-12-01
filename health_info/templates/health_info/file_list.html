@@ -1,0 +1,121 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Файлы данных - Медицинские данные{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-files"></i> Загруженные файлы</h2>
+            <span class="badge bg-primary fs-6">Всего файлов: {{ total_files }}</span>
+        </div>
+
+        {% if not files_exist %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-folder-x display-4 d-block mb-3"></i>
+            <h4>На сервере нет загруженных файлов</h4>
+            <p class="mb-3">Вы можете добавить данные через форму или загрузить файлы.</p>
+            <div class="d-grid gap-2 d-md-block">
+                <a href="{% url 'health_info:input_data' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle"></i> Ввести данные
+                </a>
+                <a href="{% url 'health_info:upload_file' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-upload"></i> Загрузить файл
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="row">
+            {% for item in file_contents %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-success">
+                                {{ item.file_info.type }}
+                            </span>
+                            <small class="text-muted ms-2">
+                                {{ item.file_info.size|filesizeformat }}
+                            </small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                    data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'health_info:download_file' item.file_info.name %}">
+                                        <i class="bi bi-download"></i> Скачать
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate" title="{{ item.file_info.name }}">
+                            <i class="bi bi-file-earmark"></i> {{ item.file_info.name }}
+                        </h6>
+                        
+                        {% if item.error %}
+                        <div class="alert alert-danger small mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Ошибка:</strong> {{ item.error }}
+                        </div>
+                        {% else %}
+                        <div class="health-data-preview">
+                            <div class="row g-2 small">
+                                <div class="col-12">
+                                    <strong>ID:</strong> {{ item.content.patient_id }}
+                                </div>
+                                <div class="col-12">
+                                    <strong>Пациент:</strong> {{ item.content.patient_name }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Возраст:</strong> {{ item.content.age }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Рост:</strong> {{ item.content.height }} см
+                                </div>
+                                <div class="col-6">
+                                    <strong>Вес:</strong> {{ item.content.weight }} кг
+                                </div>
+                                <div class="col-6">
+                                    <strong>ИМТ:</strong> 
+                                    <span class="badge 
+                                        {% if item.content.bmi < 18.5 %}bmi-underweight
+                                        {% elif item.content.bmi < 25 %}bmi-normal
+                                        {% elif item.content.bmi < 30 %}bmi-overweight
+                                        {% else %}bmi-obese{% endif %}">
+                                        {{ item.content.bmi }}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Давление:</strong> {{ item.content.blood_pressure_systolic }}/{{ item.content.blood_pressure_diastolic }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Пульс:</strong> {{ item.content.heart_rate }}
+                                </div>
+                                <div class="col-12">
+                                    <strong>Холестерин:</strong> {{ item.content.cholesterol }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i>
+                            Загружен: {{ item.file_info.modified|date:"d.m.Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
