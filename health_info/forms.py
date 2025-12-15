@@ -14,10 +14,15 @@ class HealthDataForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Введите полное имя'
             }),
+            'patient_gender': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Например: мужской, женский'
+            }),
             'age': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'max': '150'
+                'max': '150',
+                'placeholder': 'Введите возраст пациента'
             }),
             'height': forms.NumberInput(attrs={
                 'class': 'form-control',

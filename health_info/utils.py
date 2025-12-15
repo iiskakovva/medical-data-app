@@ -11,7 +11,7 @@ def validate_health_data(data):
     Валидация медицинских данных
     """
     required_fields = [
-        'patient_id', 'patient_name', 'age', 'height', 'weight',
+        'patient_id', 'patient_name', 'patient_gender', 'age', 'height', 'weight',
         'blood_pressure_systolic', 'blood_pressure_diastolic', 
         'heart_rate', 'cholesterol'
     ]
@@ -27,6 +27,9 @@ def validate_health_data(data):
     
     if not isinstance(data['patient_name'], str) or not data['patient_name'].strip():
         raise ValidationError("Имя пациента должно быть непустой строкой")
+    
+    if not isinstance(data['patient_gender'], str) or not data['patient_gender'].strip():
+        raise ValidationError("Пол пациента должен быть непустой строкой")
     
     # Проверка числовых значений
     try:
@@ -57,6 +60,7 @@ def export_to_json(health_data):
     data = {
         'patient_id': health_data.patient_id,
         'patient_name': health_data.patient_name,
+        'patient_gender': health_data.patient_gender,
         'age': health_data.age,
         'height': health_data.height,
         'weight': health_data.weight,
@@ -151,6 +155,7 @@ def save_health_data_from_dict(data):
     health_data = HealthData(
         patient_id=data['patient_id'],
         patient_name=data['patient_name'],
+        patient_gender=data['patient_gender'],
         age=data['age'],
         height=data['height'],
         weight=data['weight'],

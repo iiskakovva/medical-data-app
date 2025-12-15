@@ -9,6 +9,12 @@ class HealthData(models.Model):
         max_length=100, 
         verbose_name="Имя пациента"
     )
+    patient_gender = models.CharField(
+        max_length=20, 
+        verbose_name="Пол пациента",
+        blank=False,
+        null=False
+    )
     age = models.IntegerField(
         verbose_name="Возраст"
     )
@@ -50,6 +56,13 @@ class HealthData(models.Model):
             return "Избыточный вес"
         else:
             return "Ожирение"
+        
+    def get_gender_display(self):
+        """Получить отображаемое значение пола"""
+        for key, value in self._meta.get_field('patient_gender').choices:
+            if key == self.patient_gender:
+                return value
+        return self.patient_gender
     
     def __str__(self):
         return f"{self.patient_name} ({self.patient_id})"

@@ -24,3 +24,13 @@
 ```bash
 git clone https://github.com/iiskakovva/medical-data-app.git
 cd medical-data-app
+
+2. Установка зависимостей
+pip install -r requirements.txt
+
+3. Настройка базы данных
+python manage.py makemigrations
+python manage.py migrate
+
+4. Запуск сервера
+python manage.py runserver

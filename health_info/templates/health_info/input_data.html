@@ -46,13 +46,25 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+                    <div class="mb-3">
+                        <label class="form-label">Пол пациента *</label>
+                        {{ form.patient_gender }}
+                        <small class="form-text text-muted">Введите пол пациента (например: мужской, женский)</small>
+                        {% if form.patient_gender.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.patient_gender.errors %}
+                            <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
                     <div class="row">
                         <!-- Возраст -->
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label class="form-label">Возраст *</label>
                                 {{ form.age }}
+                                <small class="form-text text-muted">Введите возраст пациента</small>
                                 {% if form.age.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.age.errors %}
