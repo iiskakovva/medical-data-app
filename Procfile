@@ -1,1 +1,1 @@
-web: gunicorn health_project.wsgi:application --log-file -
+web: gunicorn health_project.wsgi
