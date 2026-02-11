@@ -33,4 +33,3 @@ python manage.py makemigrations
 python manage.py migrate
 
 4. Запуск сервера
-python manage.py runserver
