@@ -4,91 +4,25 @@
 *.pyc
 __pycache__/
 local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
 
 # Virtual environment
 venv/
 env/
 .venv/
-ENV/
 
-# Database
-*.db
-*.sqlite3
-*.sqlite3-*
+# Railway
+.railway/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
-Desktop.ini
-
-# Project specific
-media/health_data/*.json  # Игнорируем JSON файлы пользователей
-!media/health_data/.gitkeep  # Но сохраняем .gitkeep
-
-# Python
-*.pyc
-*.pyo
-*.pyd
-.Python
-.python-version
-
-# Django media
-/media/*/
-!/media/health_data/.gitkeep
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# pyenv
-.python-version
-
-# pip
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Complexity
-output/*.html
-output/*/index.html
-
-# Sphinx
-docs/_build/
-
-# PyCharm
-.idea/
-*.iws
-out/
-
-# VS Code
-.vscode/
