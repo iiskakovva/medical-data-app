@@ -46,18 +46,6 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Пол пациента *</label>
-                        {{ form.patient_gender }}
-                        <small class="form-text text-muted">Введите пол пациента (например: мужской, женский)</small>
-                        {% if form.patient_gender.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.patient_gender.errors %}
-                            <i class="bi bi-exclamation-circle"></i> {{ error }}<br>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    </div>
                     <div class="row">
                         <!-- Возраст -->
                         <div class="col-md-4">
@@ -254,6 +242,23 @@
                 </ul>
             </div>
         </div>
+        <div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Выберите место хранения:</h5>
+        <div class="row">
+            {% for radio in form.storage_type %}
+            <div class="col-md-3">
+                <div class="form-check">
+                    {{ radio.tag }}
+                    <label class="form-check-label" for="{{ radio.id_for_label }}">
+                        {{ radio.choice_label }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
     </div>
 </div>
 {% endblock %}

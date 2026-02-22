@@ -1,0 +1,237 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Данные из базы - Медицинские данные{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-database"></i> Данные из базы данных</h2>
+            <div>
+                <span class="badge bg-primary fs-6">Всего записей: {{ total_records }}</span>
+                <a href="{% url 'health_info:data_list' %}?source=file" class="btn btn-outline-secondary btn-sm ms-2">
+                    <i class="bi bi-files"></i> Показать файлы
+                </a>
+            </div>
+        </div>
+
+        <!-- Выбор источника данных -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-filter"></i> Источник данных</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ source_form.source.label }}</label>
+                        <div>
+                            {% for choice in source_form.source %}
+                            <div class="form-check form-check-inline">
+                                {{ choice.tag }}
+                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                    {{ choice.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Применить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- AJAX поиск -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-search"></i> Поиск по базе данных</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="ajaxSearch" 
+                               placeholder="Введите ID пациента или имя для поиска..." 
+                               value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="ajax-results mt-2"></div>
+                    <small class="text-muted">Поиск работает в реальном времени (AJAX)</small>
+                </div>
+            </div>
+        </div>
+
+        {% if not db_records_exist %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-database-x display-4 d-block mb-3"></i>
+            <h4>В базе данных нет записей</h4>
+            <p class="mb-3">Добавьте данные через форму или загрузите файлы.</p>
+            <div class="d-grid gap-2 d-md-block">
+                <a href="{% url 'health_info:input_data' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle"></i> Ввести данные
+                </a>
+                <a href="{% url 'health_info:upload_file' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-upload"></i> Загрузить файл
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <!-- Таблица данных -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Список пациентов</h5>
+                <span class="badge bg-info">Найдено: {{ records.count }}</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Пациент</th>
+                                <th>Возраст</th>
+                                <th>Рост</th>
+                                <th>Вес</th>
+                                <th>ИМТ</th>
+                                <th>Давление</th>
+                                <th>Пульс</th>
+                                <th>Холестерин</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td><strong>{{ record.patient_id }}</strong></td>
+                                <td>{{ record.patient_name }}</td>
+                                <td>{{ record.age }}</td>
+                                <td>{{ record.height }} см</td>
+                                <td>{{ record.weight }} кг</td>
+                                <td>
+                                     <span class="badge 
+                                        {% if record.bmi < 18.5 %}bmi-underweight
+                                        {% elif record.bmi < 25 %}bmi-normal
+                                        {% elif record.bmi < 30 %}bmi-overweight
+                                        {% else %}bmi-obese{% endif %}">
+                                        {{ record.bmi }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="{% if record.blood_pressure_systolic >= 140 or record.blood_pressure_diastolic >= 90 %}text-danger fw-bold{% endif %}">
+                                        {{ record.blood_pressure_systolic }}/{{ record.blood_pressure_diastolic }}
+                                    </span>
+                                </td>
+                                <td>{{ record.heart_rate }}</td>
+                                <td>{{ record.cholesterol }}</td>
+                                <td><small>{{ record.created_at|date:"d.m.Y H:i" }}</small></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'health_info:edit_record' record.id %}" 
+                                           class="btn btn-outline-primary" title="Редактировать">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ record.id }}"
+                                                title="Удалить">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Модальное окно подтверждения удаления -->
+                                    <div class="modal fade" id="deleteModal{{ record.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Подтверждение удаления</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Вы уверены, что хотите удалить запись пациента <strong>{{ record.patient_name }}</strong> (ID: {{ record.patient_id }})?</p>
+                                                    <p class="text-danger"><small>Это действие нельзя отменить!</small></p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                    <form method="post" action="{% url 'health_info:delete_record' record.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let searchTimeout;
+    
+    $('#ajaxSearch').on('input', function() {
+        clearTimeout(searchTimeout);
+        const query = $(this).val();
+        
+        if (query.length >= 2) {
+            searchTimeout = setTimeout(function() {
+                $.ajax({
+                    url: "{% url 'health_info:ajax_search' %}",
+                    data: { 'q': query },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    success: function(data) {
+                        const results = $('#searchResults');
+                        results.empty();
+                        
+                        if (data.results.length > 0) {
+                            data.results.forEach(function(item) {
+                                results.append(`
+                                    <a href="#" class="list-group-item list-group-item-action search-result-item"
+                                       data-url="${item.edit_url}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">${item.patient_name}</h6>
+                                            <small>${item.created_at}</small>
+                                        </div>
+                                        <p class="mb-1">ID: ${item.patient_id} | Возраст: ${item.age} | ИМТ: ${item.bmi}</p>
+                                    </a>
+                                `);
+                            });
+                            results.show();
+                        } else {
+                            results.append('<div class="list-group-item">Ничего не найдено</div>');
+                            results.show();
+                        }
+                    }
+                });
+            }, 300);
+        } else {
+            $('#searchResults').hide().empty();
+        }
+    });
+    
+    $('#clearSearch').on('click', function() {
+        $('#ajaxSearch').val('');
+        $('#searchResults').hide().empty();
+        window.location.href = "{% url 'health_info:data_list' %}?source=db";
+    });
+    
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#ajaxSearch, #searchResults').length) {
+            $('#searchResults').hide();
+        }
+    });
+});
+</script>
+{% endblock %}

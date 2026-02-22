@@ -1,0 +1,51 @@
+{% extends 'health_info/base.html' %}
+
+{% block title %}Подтверждение удаления - Медицинская информационная система{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Подтверждение удаления
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-user-circle fa-4x text-muted"></i>
+                    </div>
+                    
+                    <h5 class="card-title">Вы уверены, что хотите удалить запись?</h5>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-1"><strong>Пациент:</strong> {{ health_data.patient_name }}</p>
+                        <p class="mb-1"><strong>ID:</strong> {{ health_data.patient_id }}</p>
+                        <p class="mb-1"><strong>Возраст:</strong> {{ health_data.age }} лет</p>
+                        <p class="mb-0"><strong>ИМТ:</strong> {{ health_data.bmi|floatformat:1 }}</p>
+                    </div>
+                    
+                    <p class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Это действие нельзя отменить!
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Да, удалить
+                            </button>
+                            <a href="{% url 'health_info:view_data' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,42 +1,46 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class HealthData(models.Model):
     patient_id = models.CharField(
         max_length=50, 
-        verbose_name="ID пациента"
+        verbose_name="ID пациента",
+        unique=True
     )
     patient_name = models.CharField(
         max_length=100, 
         verbose_name="Имя пациента"
     )
-    patient_gender = models.CharField(
-        max_length=20, 
-        verbose_name="Пол пациента",
-        blank=False,
-        null=False
-    )
     age = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(150)],
         verbose_name="Возраст"
     )
     height = models.FloatField(
+        validators=[MinValueValidator(0)],
         verbose_name="Рост (см)"
     )
     weight = models.FloatField(
+        validators=[MinValueValidator(0)],
         verbose_name="Вес (кг)"
     )
     blood_pressure_systolic = models.IntegerField(
+        validators=[MinValueValidator(50), MaxValueValidator(250)],
         verbose_name="Систолическое давление"
     )
     blood_pressure_diastolic = models.IntegerField(
+        validators=[MinValueValidator(30), MaxValueValidator(150)],
         verbose_name="Диастолическое давление"
     )
     heart_rate = models.IntegerField(
+        validators=[MinValueValidator(30), MaxValueValidator(200)],
         verbose_name="Частота сердечных сокращений"
     )
     cholesterol = models.FloatField(
+        validators=[MinValueValidator(0)],
         verbose_name="Уровень холестерина"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     @property
     def bmi(self):
@@ -56,13 +60,6 @@ class HealthData(models.Model):
             return "Избыточный вес"
         else:
             return "Ожирение"
-        
-    def get_gender_display(self):
-        """Получить отображаемое значение пола"""
-        for key, value in self._meta.get_field('patient_gender').choices:
-            if key == self.patient_gender:
-                return value
-        return self.patient_gender
     
     def __str__(self):
         return f"{self.patient_name} ({self.patient_id})"
@@ -71,3 +68,8 @@ class HealthData(models.Model):
         verbose_name = "Медицинские данные"
         verbose_name_plural = "Медицинские данные"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['patient_id']),
+            models.Index(fields=['patient_name']),
+            models.Index(fields=['created_at']),
+        ]

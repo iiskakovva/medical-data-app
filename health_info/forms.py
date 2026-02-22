@@ -14,15 +14,10 @@ class HealthDataForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Введите полное имя'
             }),
-            'patient_gender': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Например: мужской, женский'
-            }),
             'age': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
-                'max': '150',
-                'placeholder': 'Введите возраст пациента'
+                'max': '150'
             }),
             'height': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -75,10 +70,47 @@ class HealthDataForm(forms.ModelForm):
         return cleaned_data
 
 class FileUploadForm(forms.Form):
+    FILE_TYPES = [
+        ('json', 'JSON файл'),
+        ('xml', 'XML файл'),
+    ]
+    
     file = forms.FileField(
-        label='Выберите JSON файл для загрузки',
+        label='Выберите файл для загрузки',
         widget=forms.FileInput(attrs={
             'class': 'form-control',
-            'accept': '.json'
+            'accept': '.json,.xml'
         })
+    )
+    file_type = forms.ChoiceField(
+        choices=FILE_TYPES,
+        label='Тип файла',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='json'
+    )
+
+class SaveLocationForm(forms.Form):
+    LOCATION_CHOICES = [
+        ('file', 'Сохранить в JSON/XML файл'),
+        ('db', 'Сохранить в базу данных'),
+    ]
+    
+    location = forms.ChoiceField(
+        choices=LOCATION_CHOICES,
+        label='Куда сохранить данные',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='db'
+    )
+
+class DataSourceForm(forms.Form):
+    SOURCE_CHOICES = [
+        ('db', 'База данных'),
+        ('file', 'Файлы (JSON/XML)'),
+    ]
+    
+    source = forms.ChoiceField(
+        choices=SOURCE_CHOICES,
+        label='Источник данных',
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='db'
     )
